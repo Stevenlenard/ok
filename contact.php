@@ -11,6 +11,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Updated reCAPTCHA script to use v2 with fallback for missing keys -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+    /* Add or merge this into css/contact.css if not present */
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+    .form-actions .g-recaptcha {
+        min-width: 180px;
+    }
+    .form-actions .btn-primary {
+        margin: 0;
+    }
+    </style>
 </head>
 <body>
     <div id="scrollProgress" class="scroll-progress"></div>
@@ -141,13 +158,13 @@
                             <textarea id="message" name="message" placeholder="Tell us more about your inquiry..." required></textarea>
                         </div>
                         
-                        <!-- Replaced hidden token field with reCAPTCHA v2 checkbox -->
-                        <div class="g-recaptcha" data-sitekey="<?php echo getenv('RECAPTCHA_SITE_KEY') ?: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'; ?>"></div>
-                        
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Send Message
-                        </button>
+                        <div class="form-actions">
+                            <div class="g-recaptcha" data-sitekey="<?php echo getenv('RECAPTCHA_SITE_KEY') ?: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'; ?>"></div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Message
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -173,7 +190,6 @@
                     <p class="description"><i class="fas fa-phone"></i> +63 912 345 6789</p>
                     <p class="description"><i class="fab fa-facebook"></i> <a href="https://facebook.com/prin.barola">facebook.com/prin.barola</a></p>
                 </div>
-
                 <div class="team-card">
                     <div class="team-avatar">
                         <img src="images/espaldon.jpeg" alt="Espaldon, Steven Lenard E.">
@@ -195,7 +211,6 @@
                     <p class="description"><i class="fas fa-phone"></i> +63 934 567 8901</p>
                     <p class="description"><i class="fab fa-facebook"></i> <a href="https://facebook.com/michael.fruelda">facebook.com/michael.fruelda</a></p>
                 </div>
-
                 <div class="team-card">
                     <div class="team-avatar">
                         <img src="images/noblefranca.jpg" alt="Noblefranca, Joven M.">
@@ -259,7 +274,7 @@
 
     <?php include 'includes/info-modals.php'; ?>
 
-    <!-- Single strict validator for required and captcha -->
+    <!-- STRICT VALIDATION script: -->
     <script>
     document.getElementById('contactForm').addEventListener('submit', function(e) {
         const form = this;
@@ -279,7 +294,6 @@
             alert('Please verify that you are not a robot (CAPTCHA required).');
         }
         if (!isValid) {
-            // Button stays enabled; spinner does NOT run
             e.preventDefault();
             return false;
         }
