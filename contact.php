@@ -259,32 +259,37 @@
 
     <?php include 'includes/info-modals.php'; ?>
 
-    <!-- Simplified token generation and form submission -->
+    <!-- Single strict validator for required and captcha -->
     <script>
-        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        const form = this;
+        let isValid = true;
+        // Required fields
+        const inputs = form.querySelectorAll('input[required], textarea[required]');
+        for (let input of inputs) {
+            if (!input.value.trim()) {
+                isValid = false;
+                input.style.borderColor = '#ef4444';
+                setTimeout(() => { input.style.borderColor = ''; }, 2000);
+            }
+        }
+        // reCAPTCHA required
+        if (typeof grecaptcha !== "undefined" && grecaptcha.getResponse().length === 0) {
+            isValid = false;
+            alert('Please verify that you are not a robot (CAPTCHA required).');
+        }
+        if (!isValid) {
+            // Button stays enabled; spinner does NOT run
             e.preventDefault();
-            
-            const form = this;
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalText = submitButton.innerHTML;
-            
-            // Disable button and show loading state
+            return false;
+        }
+        // Spinner/loading state only if passed
+        const submitButton = form.querySelector('button[type="submit"]');
+        if(submitButton){
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-            
-            try {
-                console.log("[v0] Form submission started");
-                
-                // For reCAPTCHA v2, the token is automatically included in the form
-                // Submit the form directly
-                form.submit();
-            } catch (error) {
-                console.error("[v0] Form submission error:", error);
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalText;
-                alert('Error submitting form. Please try again.');
-            }
-        });
+        }
+    });
     </script>
 
     <?php
@@ -327,14 +332,11 @@
 
     function verifyRecaptchaToken($token) {
         $secretKey = getenv('RECAPTCHA_SECRET_KEY');
-        
-        // Use test secret key if no key is configured
+        // Use test secret key if none configured
         if (!$secretKey) {
             $secretKey = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
         }
-        
         $url = "https://www.google.com/recaptcha/api/siteverify";
-        
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -343,14 +345,9 @@
             'secret' => $secretKey,
             'response' => $token
         ]));
-        
         $response = curl_exec($ch);
         curl_close($ch);
-        
         $result = json_decode($response, true);
-        console.log("[v0] reCAPTCHA verification result:", $result);
-        
-        // Check if verification was successful
         return isset($result['success']) && $result['success'] === true;
     }
     ?>

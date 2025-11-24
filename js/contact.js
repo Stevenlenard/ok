@@ -10,12 +10,10 @@
   // SCROLL PROGRESS INDICATOR
   // ============================================
   function initScrollProgress() {
-    // Create progress bar element
     const progressBar = document.createElement('div');
     progressBar.className = 'scroll-progress';
     document.body.appendChild(progressBar);
 
-    // Update progress on scroll
     function updateProgress() {
       const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -34,18 +32,13 @@
     const header = document.querySelector('.header');
     if (!header) return;
 
-    let lastScroll = 0;
-
     function handleScroll() {
       const currentScroll = window.pageYOffset;
-
       if (currentScroll > 50) {
         header.classList.add('scrolled');
       } else {
         header.classList.remove('scrolled');
       }
-
-      lastScroll = currentScroll;
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -67,17 +60,12 @@
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          // Add visible class to trigger CSS animations
           entry.target.classList.add('visible');
-          
-          // Add stagger effect for team cards
           if (entry.target.classList.contains('team-card')) {
             const parent = entry.target.parentElement;
             const index = Array.from(parent.children).indexOf(entry.target);
             entry.target.style.transitionDelay = `${index * 0.1}s`;
           }
-
-          // Unobserve after animation
           observer.unobserve(entry.target);
         }
       });
@@ -165,11 +153,14 @@
     links.forEach(link => {
       link.addEventListener('click', (e) => {
         const href = link.getAttribute('href');
-        
-        if (href !== '#' && href !== '#privacy' && href !== '#terms' && href !== '#support') {
+        if (
+          href !== '#' &&
+          href !== '#privacy' &&
+          href !== '#terms' &&
+          href !== '#support'
+        ) {
           e.preventDefault();
           const target = document.querySelector(href);
-
           if (target) {
             const offsetTop = target.offsetTop - 80;
             window.scrollTo({
@@ -183,7 +174,7 @@
   }
 
   // ============================================
-  // FORM VALIDATION & ENHANCEMENT
+  // FORM VALIDATION & ENHANCEMENT + RECAPTCHA CHECK
   // ============================================
   function initFormEnhancement() {
     const form = document.querySelector('.contact-form form');
@@ -204,7 +195,7 @@
       });
     });
 
-    // Form submission with validation
+    // Form submission with validation & recaptcha
     form.addEventListener('submit', function(e) {
       let isValid = true;
 
@@ -212,21 +203,32 @@
         if (input.hasAttribute('required') && !input.value.trim()) {
           isValid = false;
           input.style.borderColor = '#ef4444';
-          
           setTimeout(() => {
             input.style.borderColor = '';
           }, 2000);
         }
       });
 
+      // reCAPTCHA validation
+      if(typeof grecaptcha !== "undefined" && grecaptcha.getResponse().length === 0) {
+        isValid = false;
+        alert('Please verify that you are not a robot (CAPTCHA required).');
+      }
+
       if (!isValid) {
         e.preventDefault();
-        
-        // Scroll to first invalid field
         const firstInvalid = form.querySelector('input:invalid, textarea:invalid');
         if (firstInvalid) {
           firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
           firstInvalid.focus();
+        }
+      } else {
+        // Show spinner/loading state
+        const submitButton = form.querySelector('button[type="submit"]');
+        if(submitButton){
+          const originalText = submitButton.innerHTML;
+          submitButton.disabled = true;
+          submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         }
       }
     });
@@ -240,28 +242,24 @@
     if (!footerText) return;
 
     const messages = [
-       'Making waste management smarter, one bin at a time.',
-        'Powered by IoT technology and sustainable innovation.',
-        'Join us in creating cleaner, greener communities.',
-        'Real-time monitoring for a cleaner tomorrow.'
+      'Making waste management smarter, one bin at a time.',
+      'Powered by IoT technology and sustainable innovation.',
+      'Join us in creating cleaner, greener communities.',
+      'Real-time monitoring for a cleaner tomorrow.'
     ];
-    
+
     let currentIndex = 0;
-    
+
     function updateFooterText() {
       footerText.style.opacity = '0';
-      
       setTimeout(() => {
         footerText.textContent = messages[currentIndex];
         footerText.style.opacity = '1';
         currentIndex = (currentIndex + 1) % messages.length;
       }, 500);
     }
-    
-    // Initial text
+
     footerText.textContent = messages[0];
-    
-    // Rotate messages every 5 seconds
     setInterval(updateFooterText, 5000);
   }
 
@@ -270,7 +268,6 @@
   // ============================================
   function initPageLoad() {
     document.body.style.opacity = '0';
-    
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.body.style.transition = 'opacity 0.6s ease';
@@ -339,15 +336,12 @@
   // INITIALIZE ALL ANIMATIONS
   // ============================================
   function init() {
-    // Check if DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
       return;
     }
 
     console.log('🚀 Initializing Contact Page Premium Animations...');
-
-    // Initialize all features
     initPageLoad();
     initScrollProgress();
     initHeaderScroll();
@@ -362,11 +356,9 @@
     initLogoAnimation();
     initBackToTop();
     logPerformance();
-
     console.log('✨ All animations initialized successfully!');
   }
 
-  // Start initialization
   init();
 
 })();
@@ -420,12 +412,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
-  // Close modal on ESC key
   document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
       closeRoleModal();
     }
   });
 });
-
